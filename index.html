@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>臺北市立圖書館東區分館業務委員會抽籤系統</title>
+    <title>臺北市立圖書館 分館委員會抽籤系統</title>
     <style>
         :root {
             --primary-color: #1b4332;
@@ -307,9 +307,11 @@
     </header>
 
     <div class="main-container">
-        <!-- 頂部水果盤顯示區 -->
+        <!-- 頂部水果盤區域 -->
         <div class="slot-machine-card">
-                 <div id="currentTarget" class="current-target">👈 請先點選下方分館</div>
+            <div id="statusBadge" class="status-badge">請選擇分館</div>
+            <div id="currentTarget" class="current-target">👈 請先點選下方分館</div>
+
             <div class="slot-window">
                 <div id="slotReel" class="slot-reel">
                     <div class="slot-item">Good Luck !</div>
@@ -455,7 +457,7 @@
             selectedBranch = branch;
             updateTopDisplay();
             updateCardHighlights();
-            showReelText("Good Luck !"); // 點選分館後固定維持 [請開始]
+            showReelText("Good Luck !");
         }
 
         function updateTopDisplay() {
@@ -465,10 +467,11 @@
 
             if (!selectedBranch) {
                 if (badge) {
+                    badge.innerText = "請選擇分館";
                     badge.style.background = "#2d6a4f";
                     badge.style.color = "#d8f3dc";
                 }
-                if (target) target.innerText = "👈 請點選下方分館";
+                if (target) target.innerText = "👈 請先點選下方分館";
                 if (spinBtn) spinBtn.disabled = true;
             } else {
                 const drawn = drawResults[selectedBranch] || [];
@@ -590,7 +593,7 @@
                 }
 
                 if (selected === "館藏發展委員會" && activeBranch !== "松山分館") {
-                    showToast(`【${activeBranch}】恭喜您抽中館藏發展委員會，免抽第二個委員會！🎉`);
+                    showToast(`【${activeBranch}】抽中館藏發展委員會，觸發免抽第二項規則！🎉`);
                 } else if (activeBranch === "松山分館") {
                     showToast(`【松山分館】已完成單項抽籤！👍`);
                 }
