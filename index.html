@@ -372,17 +372,22 @@
             showReelText("Good Luck !");
         }
 
+        // 判斷該分館是否已完成抽籤
         function isBranchCompleted(branch) {
             const drawn = drawResults[branch] || [];
+            // 松山分館只需 1 次
             if (branch === "松山分館") {
                 return drawn.length >= 1;
             }
+            // 若第一籤抽中「館藏發展委員會」，直接額滿完成
             if (drawn.includes("館藏發展委員會")) {
                 return true;
             }
+            // 其餘分館需 2 次
             return drawn.length >= 2;
         }
 
+        // 統計全系統各委員會被抽中的次數
         function getCommitteeCounts() {
             const counts = {};
             ALL_COMMITTEES.forEach(c => counts[c] = 0);
@@ -395,15 +400,27 @@
             return counts;
         }
 
+        // 計算目前分館可抽取的選項
         function getAvailableOptions(branch) {
             const drawnByThisBranch = drawResults[branch] || [];
             const globalCounts = getCommitteeCounts();
+            const isFirstDraw = (drawnByThisBranch.length === 0);
 
             return ALL_COMMITTEES.filter(c => {
+                // 1. 同一分館不可重複抽中相同的委員會
                 if (drawnByThisBranch.includes(c)) return false;
+
+                // 2. 松山分館排除「館藏發展委員會」
                 if (branch === "松山分館" && c === "館藏發展委員會") return false;
-                if (c === "館藏發展委員會" && globalCounts[c] >= 1) return false;
-                if (c !== "館藏發展委員會" && globalCounts[c] >= 2) return false;
+
+                // 3. 館藏發展委員會：只能在第 1 支籤可抽，且全系統最多 1 次
+                if (c === "館藏發展委員會") {
+                    if (!isFirstDraw) return false;
+                    if (globalCounts[c] >= 1) return false;
+                } else {
+                    // 4. 其他委員會：全系統最多 2 次
+                    if (globalCounts[c] >= 2) return false;
+                }
 
                 return true;
             });
@@ -593,7 +610,7 @@
                 }
 
                 if (selected === "館藏發展委員會" && activeBranch !== "松山分館") {
-                    showToast(`【${activeBranch}】抽中館藏發展委員會，觸發免抽第二項規則！🎉`);
+                    showToast(`【${activeBranch}】第1籤抽中館藏發展委員會，觸發免抽第2籤規則！🎉`);
                 } else if (activeBranch === "松山分館") {
                     showToast(`【松山分館】已完成單項抽籤！👍`);
                 }
