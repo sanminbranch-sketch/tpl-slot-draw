@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 強制瀏覽器不快取舊版內容 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -311,11 +310,11 @@
         <!-- 頂部水果盤顯示區 -->
         <div class="slot-machine-card">
             <div id="statusBadge" class="status-badge">請選擇分館</div>
-            <div id="currentTarget" class="current-target">👈 請點選下方分館</div>
+            <div id="currentTarget" class="current-target">👈 請先點選下方分館</div>
 
             <div class="slot-window">
                 <div id="slotReel" class="slot-reel">
-                    <div class="slot-item">請先選擇分館</div>
+                    <div class="slot-item">[請開始]</div>
                 </div>
             </div>
 
@@ -370,9 +369,10 @@
             
             updateTopDisplay();
             renderResultsGrid();
-            showReelText("請先選擇分館");
+            showReelText("[請開始]");
         }
 
+        // 判斷某分館是否已完成抽籤
         function isBranchCompleted(branch) {
             const drawn = drawResults[branch] || [];
             if (branch === "松山分館") {
@@ -384,14 +384,39 @@
             return drawn.length >= 2;
         }
 
+        // 計算全系統各委員會被抽中的次數
+        function getCommitteeCounts() {
+            const counts = {};
+            ALL_COMMITTEES.forEach(c => counts[c] = 0);
+            
+            Object.values(drawResults).forEach(drawnList => {
+                drawnList.forEach(c => {
+                    if (counts[c] !== undefined) counts[c]++;
+                });
+            });
+            return counts;
+        }
+
+        // 取得該分館目前「合法可抽取」的委員會清單
         function getAvailableOptions(branch) {
-            let options = [...ALL_COMMITTEES];
-            if (branch === "松山分館") {
-                options = options.filter(c => c !== "館藏發展委員會");
-            }
-            const existingDrawn = drawResults[branch] || [];
-            options = options.filter(c => !existingDrawn.includes(c));
-            return options;
+            const drawnByThisBranch = drawResults[branch] || [];
+            const globalCounts = getCommitteeCounts();
+
+            return ALL_COMMITTEES.filter(c => {
+                // 1. 同一分館不可重複抽中相同的委員會
+                if (drawnByThisBranch.includes(c)) return false;
+
+                // 2. 松山分館不能抽「館藏發展委員會」
+                if (branch === "松山分館" && c === "館藏發展委員會") return false;
+
+                // 3. 館藏發展委員會只能有 1 個分館中籤
+                if (c === "館藏發展委員會" && globalCounts[c] >= 1) return false;
+
+                // 4. 其他委員會最多被 2 個不同分館抽中
+                if (c !== "館藏發展委員會" && globalCounts[c] >= 2) return false;
+
+                return true;
+            });
         }
 
         function showReelText(text) {
@@ -442,7 +467,7 @@
             selectedBranch = branch;
             updateTopDisplay();
             updateCardHighlights();
-            showReelText(`準備為【${branch}】抽籤`);
+            showReelText("[請開始]");
         }
 
         function updateTopDisplay() {
@@ -511,7 +536,10 @@
             if (isSpinning || !selectedBranch) return;
 
             const options = getAvailableOptions(selectedBranch);
-            if (options.length === 0) return;
+            if (options.length === 0) {
+                showToast(`【${selectedBranch}】無可抽取的委員會！`);
+                return;
+            }
 
             isSpinning = true;
             const spinBtn = document.getElementById("spinBtn");
@@ -530,14 +558,16 @@
                 target.innerText = `【${selectedBranch}】 正在抽取第 ${currentDrawNum} 個委員會...`;
             }
 
+            // 從可選清單中隨機抽取 1 個
             const selected = options[Math.floor(Math.random() * options.length)];
 
+            // 水果盤動畫構建
             const reel = document.getElementById("slotReel");
             let reelHtml = "";
             const totalAnimationItems = 25;
 
             for (let i = 0; i < totalAnimationItems; i++) {
-                const randomOpt = ALL_COMMITTEES[Math.floor(Math.random() * ALL_COMMITTEES.length)];
+                const randomOpt = options[Math.floor(Math.random() * options.length)];
                 reelHtml += `<div class="slot-item">${randomOpt}</div>`;
             }
             reelHtml += `<div class="slot-item" style="color: #ffb703; font-size: 1.7rem;">🎉 ${selected}</div>`;
@@ -553,13 +583,15 @@
                 reel.style.top = `${targetTop}px`;
             }
 
+            // 動畫結束處理
             setTimeout(() => {
                 isSpinning = false;
                 const activeBranch = selectedBranch;
                 drawResults[activeBranch].push(selected);
 
+                // 檢查該分館是否已達完成條件
                 if (isBranchCompleted(activeBranch)) {
-                    selectedBranch = null;
+                    selectedBranch = null; // 完成後取消鎖定
                 }
 
                 updateTopDisplay();
@@ -574,6 +606,7 @@
                     target.innerText = `🎉 【${activeBranch}】 抽中了：${selected}`;
                 }
 
+                // 彈窗通知特殊規則
                 if (selected === "館藏發展委員會" && activeBranch !== "松山分館") {
                     showToast(`【${activeBranch}】抽中館藏發展委員會，觸發免抽第二項規則！🎉`);
                 } else if (activeBranch === "松山分館") {
@@ -601,7 +634,7 @@
             }
         }
 
-        // 多重防卡死啟動機制：確保任何情況下開網頁都能直接顯示卡片
+        // 防快取與確保 DOM 載入完整性
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", init);
         } else {
