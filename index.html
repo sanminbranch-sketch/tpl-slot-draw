@@ -457,7 +457,7 @@
             selectedBranch = branch;
             updateTopDisplay();
             updateCardHighlights();
-            showReelText("[請開始]"); // 點選分館後固定維持 [請開始]
+            showReelText("Good Lucy"); // 點選分館後固定維持 [請開始]
         }
 
         function updateTopDisplay() {
@@ -467,11 +467,10 @@
 
             if (!selectedBranch) {
                 if (badge) {
-                    badge.innerText = "請選擇分館";
                     badge.style.background = "#2d6a4f";
                     badge.style.color = "#d8f3dc";
                 }
-                if (target) target.innerText = "👈 請先點選下方分館";
+                if (target) target.innerText = "👈 請點選下方分館";
                 if (spinBtn) spinBtn.disabled = true;
             } else {
                 const drawn = drawResults[selectedBranch] || [];
@@ -593,7 +592,7 @@
                 }
 
                 if (selected === "館藏發展委員會" && activeBranch !== "松山分館") {
-                    showToast(`【${activeBranch}】抽中館藏發展委員會，觸發免抽第二項規則！🎉`);
+                    showToast(`【${activeBranch}】恭喜您抽中館藏發展委員會，免抽第二個委員會！🎉`);
                 } else if (activeBranch === "松山分館") {
                     showToast(`【松山分館】已完成單項抽籤！👍`);
                 }
