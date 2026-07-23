@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>臺北市立圖書館 分館委員會抽籤系統 (水果盤模式)</title>
+    <title>臺北市立圖書館 分館委員會抽籤系統</title>
     <style>
         :root {
             --primary-color: #1b4332;
@@ -57,11 +57,12 @@
         .main-container {
             width: 100%;
             max-width: 900px;
-            display: grid;
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 20px;
         }
 
+        /* 頂部水果盤區域 */
         .slot-machine-card {
             background: var(--panel-bg);
             border: 3px solid var(--accent-gold);
@@ -69,7 +70,6 @@
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             text-align: center;
-            position: relative;
         }
 
         .status-badge {
@@ -79,15 +79,16 @@
             border-radius: 20px;
             font-size: 1rem;
             display: inline-block;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             border: 1px solid var(--accent-gold);
         }
 
         .current-target {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: bold;
             color: #ffffff;
             margin-bottom: 15px;
+            min-height: 2.2rem;
         }
 
         .slot-window {
@@ -118,7 +119,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: bold;
             color: var(--accent-gold);
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
@@ -129,32 +130,56 @@
 
         .controls {
             display: flex;
-            gap: 15px;
             justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
-        .btn {
-            padding: 10px 24px;
-            font-size: 1rem;
+        /* 拉霸大按鈕 */
+        .btn-spin {
+            padding: 12px 35px;
+            font-size: 1.2rem;
             font-weight: bold;
-            border: none;
+            background: linear-gradient(180deg, #ffb703 0%, #fb8500 100%);
+            color: #000;
+            border: 2px solid #fff;
             border-radius: 30px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(255, 183, 3, 0.4);
+            transition: all 0.2s;
+        }
+
+        .btn-spin:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 183, 3, 0.7);
+        }
+
+        .btn-spin:disabled {
+            background: #555;
+            color: #888;
+            border-color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
         .btn-reset {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: bold;
             background: #333;
             color: #ccc;
             border: 1px solid #555;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .btn-reset:hover {
             background: #d90429;
             color: #fff;
-            border-color: #d90429;
         }
 
+        /* 下方分館列表區域 */
         .results-section {
             background: var(--panel-bg);
             border-radius: 16px;
@@ -176,7 +201,6 @@
             gap: 15px;
         }
 
-        /* 可點擊的分館卡片樣式 */
         .result-card {
             background: var(--card-bg);
             border-radius: 10px;
@@ -184,21 +208,20 @@
             border: 2px solid var(--secondary-color);
             transition: all 0.2s ease;
             cursor: pointer;
-            position: relative;
             user-select: none;
         }
 
-        .result-card:hover:not(.completed):not(.disabled) {
+        .result-card:hover:not(.completed) {
             transform: translateY(-3px);
             border-color: var(--accent-gold);
             box-shadow: 0 6px 15px rgba(255, 183, 3, 0.3);
             background: #22577a;
         }
 
-        .result-card.spinning {
-            border-color: var(--accent-gold);
-            background: #2a6f97;
-            animation: pulse 1s infinite alternate;
+        .result-card.selected-active {
+            border-color: #ffb703 !important;
+            background: #2a6f97 !important;
+            box-shadow: 0 0 15px rgba(255, 183, 3, 0.6);
         }
 
         .result-card.completed {
@@ -247,7 +270,7 @@
         .click-hint {
             font-size: 0.8rem;
             color: #ffb703;
-            margin-top: 5px;
+            margin-top: 8px;
             text-align: right;
         }
 
@@ -271,40 +294,36 @@
         .toast.show {
             opacity: 1;
         }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 5px var(--accent-gold); }
-            100% { box-shadow: 0 0 20px var(--accent-gold); }
-        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🎰 臺北市立圖書館 委員會點擊抽籤水果盤</h1>
-        <p>👇 請直接點擊下方任意「分館卡片」進行拉霸抽籤</p>
+        <h1>🎰 臺北市立圖書館 委員會抽籤系統</h1>
+        <p>1. 點擊下方「分館」進行選取  ➔  2. 按上方「開始拉霸抽籤」按鈕</p>
     </header>
 
     <div class="main-container">
-        <!-- 水果盤顯示區域 -->
+        <!-- 頂部水果盤顯示區 -->
         <div class="slot-machine-card">
-            <div id="statusBadge" class="status-badge">等待點擊分館</div>
-            <div id="currentTarget" class="current-target">👈 請點擊下方分館開始抽籤</div>
+            <div id="statusBadge" class="status-badge">請選擇分館</div>
+            <div id="currentTarget" class="current-target">👈 請點選下方分館</div>
 
             <div class="slot-window">
                 <div id="slotReel" class="slot-reel">
-                    <div class="slot-item">點擊下方分館進行抽籤</div>
+                    <div class="slot-item">請先選擇分館</div>
                 </div>
             </div>
 
             <div class="controls">
-                <button class="btn btn-reset" onclick="resetAll()">🔄 重置所有抽籤紀錄</button>
+                <button id="spinBtn" class="btn-spin" onclick="startManualSpin()" disabled>🎰 開始拉霸抽籤</button>
+                <button class="btn-reset" onclick="resetAll()">🔄 重置所有紀錄</button>
             </div>
         </div>
 
-        <!-- 11 個分館卡片區域 -->
+        <!-- 下方 11 個分館選單區 -->
         <div class="results-section">
-            <h2>📋 點擊各分館進行抽籤</h2>
+            <h2>📋 各分館清單（點擊選擇分館）</h2>
             <div id="resultsGrid" class="results-grid"></div>
         </div>
     </div>
@@ -330,6 +349,7 @@
         ];
 
         let drawResults = {};
+        let selectedBranch = null; // 當前被選中的分館
         let isSpinning = false;
 
         function init() {
@@ -337,10 +357,12 @@
             ALL_BRANCHES.forEach(branch => {
                 drawResults[branch] = [];
             });
+            selectedBranch = null;
             isSpinning = false;
-            updateUI();
+            
+            updateTopDisplay();
             renderResultsGrid();
-            showReelText("點擊下方分館進行抽籤");
+            showReelText("請先選擇分館");
         }
 
         function isBranchCompleted(branch) {
@@ -366,20 +388,23 @@
 
         function showReelText(text) {
             const reel = document.getElementById("slotReel");
-            reel.style.transition = "none";
-            reel.style.top = "0px";
-            reel.innerHTML = `<div class="slot-item">${text}</div>`;
+            if (reel) {
+                reel.style.transition = "none";
+                reel.style.top = "0px";
+                reel.innerHTML = `<div class="slot-item">${text}</div>`;
+            }
         }
 
         function renderResultsGrid() {
             const grid = document.getElementById("resultsGrid");
+            if (!grid) return;
             grid.innerHTML = "";
 
             ALL_BRANCHES.forEach((branch, index) => {
                 const card = document.createElement("div");
                 card.id = `card-${index}`;
                 card.className = "result-card";
-                card.onclick = () => spinForBranch(branch, index);
+                card.onclick = () => selectBranch(branch, index);
 
                 let tagText = branch === "松山分館" ? "特規：僅抽1項" : "可抽 2 項";
 
@@ -391,11 +416,53 @@
                     <div class="committee-list" id="list-${index}">
                         <span style="color: #888;">尚未抽取</span>
                     </div>
-                    <div class="click-hint" id="hint-${index}">👉 點擊開始抽籤</div>
+                    <div class="click-hint" id="hint-${index}">👉 點擊選擇</div>
                 `;
                 grid.appendChild(card);
             });
             updateCardHighlights();
+        }
+
+        // 點擊下方卡片：僅進行「選取」
+        function selectBranch(branch, index) {
+            if (isSpinning) return;
+
+            if (isBranchCompleted(branch)) {
+                showToast(`【${branch}】已完成所有抽籤！`);
+                return;
+            }
+
+            selectedBranch = branch;
+            updateTopDisplay();
+            updateCardHighlights();
+            showReelText(`準備為【${branch}】抽籤`);
+        }
+
+        function updateTopDisplay() {
+            const badge = document.getElementById("statusBadge");
+            const target = document.getElementById("currentTarget");
+            const spinBtn = document.getElementById("spinBtn");
+
+            if (!selectedBranch) {
+                if (badge) {
+                    badge.innerText = "請選擇分館";
+                    badge.style.background = "#2d6a4f";
+                    badge.style.color = "#d8f3dc";
+                }
+                if (target) target.innerText = "👈 請先點選下方分館";
+                if (spinBtn) spinBtn.disabled = true;
+            } else {
+                const drawn = drawResults[selectedBranch] || [];
+                const currentDrawNum = drawn.length + 1;
+                
+                if (badge) {
+                    badge.innerText = "已選擇分館";
+                    badge.style.background = "#ffb703";
+                    badge.style.color = "#000";
+                }
+                if (target) target.innerText = `已選擇：【${selectedBranch}】 (準備抽第 ${currentDrawNum} 項)`;
+                if (spinBtn) spinBtn.disabled = false;
+            }
         }
 
         function updateCardHighlights() {
@@ -407,52 +474,59 @@
 
                 const drawn = drawResults[branch] || [];
 
-                // 更新選中的委員會標籤
                 if (drawn.length > 0) {
                     listDiv.innerHTML = drawn.map(item => `<span class="committee-tag">${item}</span>`).join("");
                 } else {
                     listDiv.innerHTML = `<span style="color: #888;">尚未抽取</span>`;
                 }
 
-                // 更新狀態與按鈕提示
+                card.classList.remove("selected-active");
+
                 if (isBranchCompleted(branch)) {
                     card.classList.add("completed");
-                    card.classList.remove("spinning");
                     hintDiv.innerText = "✅ 已完成";
                     hintDiv.style.color = "#52b788";
                 } else {
                     card.classList.remove("completed");
                     const remain = (branch === "松山分館") ? 1 : (2 - drawn.length);
-                    hintDiv.innerText = `👉 點擊抽第 ${drawn.length + 1} 項 (還差 ${remain} 項)`;
+                    hintDiv.innerText = `👉 點擊選擇 (還差 ${remain} 項)`;
                     hintDiv.style.color = "#ffb703";
+                }
+
+                if (branch === selectedBranch) {
+                    card.classList.add("selected-active");
+                    hintDiv.innerText = "🎯 目前選取中";
                 }
             });
         }
 
-        function spinForBranch(branch, index) {
-            if (isSpinning) return;
-            if (isBranchCompleted(branch)) {
-                showToast(`【${branch}】已完成所有抽籤！`);
-                return;
-            }
+        // 手動按下「開始拉霸抽籤」按鈕後觸發
+        function startManualSpin() {
+            if (isSpinning || !selectedBranch) return;
 
-            const options = getAvailableOptions(branch);
+            const options = getAvailableOptions(selectedBranch);
             if (options.length === 0) return;
 
             isSpinning = true;
-            const currentDrawNum = (drawResults[branch] || []).length + 1;
+            const spinBtn = document.getElementById("spinBtn");
+            if (spinBtn) spinBtn.disabled = true;
 
-            document.getElementById("statusBadge").innerText = "🎰 抽籤中...";
-            document.getElementById("statusBadge").style.background = "#ffb703";
-            document.getElementById("statusBadge").style.color = "#000";
-            document.getElementById("currentTarget").innerText = `正在為【${branch}】抽取第 ${currentDrawNum} 個委員會...`;
+            const currentDrawNum = (drawResults[selectedBranch] || []).length + 1;
+            const badge = document.getElementById("statusBadge");
+            const target = document.getElementById("currentTarget");
 
-            const card = document.getElementById(`card-${index}`);
-            card.classList.add("spinning");
+            if (badge) {
+                badge.innerText = "🎰 正在拉霸中...";
+                badge.style.background = "#ffb703";
+                badge.style.color = "#000";
+            }
+            if (target) {
+                target.innerText = `【${selectedBranch}】 正在抽取第 ${currentDrawNum} 個委員會...`;
+            }
 
             const selected = options[Math.floor(Math.random() * options.length)];
 
-            // 動畫設定
+            // 啟動水果盤滾動動畫
             const reel = document.getElementById("slotReel");
             let reelHtml = "";
             const totalAnimationItems = 25;
@@ -461,32 +535,46 @@
                 const randomOpt = ALL_COMMITTEES[Math.floor(Math.random() * ALL_COMMITTEES.length)];
                 reelHtml += `<div class="slot-item">${randomOpt}</div>`;
             }
-            reelHtml += `<div class="slot-item" style="color: #ffb703; font-size: 1.6rem;">🎉 ${selected}</div>`;
+            reelHtml += `<div class="slot-item" style="color: #ffb703; font-size: 1.7rem;">🎉 ${selected}</div>`;
 
-            reel.style.transition = "none";
-            reel.style.top = "0px";
-            reel.innerHTML = reelHtml;
-            reel.offsetHeight;
+            if (reel) {
+                reel.style.transition = "none";
+                reel.style.top = "0px";
+                reel.innerHTML = reelHtml;
+                reel.offsetHeight;
 
-            const targetTop = -(totalAnimationItems * 120);
-            reel.style.transition = "top 2.2s cubic-bezier(0.15, 0.85, 0.35, 1.05)";
-            reel.style.top = `${targetTop}px`;
+                const targetTop = -(totalAnimationItems * 120);
+                reel.style.transition = "top 2.2s cubic-bezier(0.15, 0.85, 0.35, 1.05)";
+                reel.style.top = `${targetTop}px`;
+            }
 
+            // 動畫結束後寫入紀錄
             setTimeout(() => {
                 isSpinning = false;
-                card.classList.remove("spinning");
-                drawResults[branch].push(selected);
+                const activeBranch = selectedBranch;
+                drawResults[activeBranch].push(selected);
+
+                // 判斷是否已完成該分館
+                if (isBranchCompleted(activeBranch)) {
+                    selectedBranch = null; // 完成後取消選取
+                }
+
+                updateTopDisplay();
                 updateCardHighlights();
 
-                document.getElementById("statusBadge").innerText = "等待點擊分館";
-                document.getElementById("statusBadge").style.background = "#2d6a4f";
-                document.getElementById("statusBadge").style.color = "#d8f3dc";
-                document.getElementById("currentTarget").innerText = `【${branch}】抽中了：${selected}`;
+                if (badge) {
+                    badge.innerText = "抽籤完成";
+                    badge.style.background = "#52b788";
+                    badge.style.color = "#fff";
+                }
+                if (target) {
+                    target.innerText = `🎉 【${activeBranch}】 抽中了：${selected}`;
+                }
 
-                // 特殊提示
-                if (selected === "館藏發展委員會" && branch !== "松山分館") {
-                    showToast(`【${branch}】抽中館藏發展委員會，觸發免抽第二項規則！🎉`);
-                } else if (branch === "松山分館") {
+                // 特規提示
+                if (selected === "館藏發展委員會" && activeBranch !== "松山分館") {
+                    showToast(`【${activeBranch}】抽中館藏發展委員會，觸發免抽第二項規則！🎉`);
+                } else if (activeBranch === "松山分館") {
                     showToast(`【松山分館】已完成單項抽籤！👍`);
                 }
 
@@ -495,6 +583,7 @@
 
         function showToast(msg) {
             const toast = document.getElementById("toast");
+            if (!toast) return;
             toast.innerText = msg;
             toast.classList.add("show");
             setTimeout(() => {
@@ -505,11 +594,11 @@
         function resetAll() {
             if (confirm("確定要重置所有分館的抽籤紀錄嗎？")) {
                 init();
-                showToast("已重置所有資料，請重新點擊分館進行抽籤");
+                showToast("已重置所有資料，請重新選擇分館進行抽籤");
             }
         }
 
-        window.onload = init;
+        document.addEventListener("DOMContentLoaded", init);
     </script>
 </body>
 </html>
