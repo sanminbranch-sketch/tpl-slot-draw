@@ -1,604 +1,332 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>臺北市立圖書館 分館委員會抽籤系統</title>
-    <style>
-        :root {
-            --primary-color: #1b4332;
-            --secondary-color: #2d6a4f;
-            --accent-gold: #ffb703;
-            --accent-red: #d90429;
-            --bg-color: #081c15;
-            --panel-bg: #113829;
-            --card-bg: #1b4332;
-            --text-light: #f8f9fa;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>圖書館委員會抽籤系統</title>
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e67e22;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-        }
+    body {
+      font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-light);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .container {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      width: 100%;
+      max-width: 550px;
+      padding: 30px;
+      text-align: center;
+    }
 
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--accent-gold);
-            padding-bottom: 10px;
-            width: 100%;
-            max-width: 900px;
-        }
+    h1 {
+      margin-top: 0;
+      color: var(--primary-color);
+      font-size: 1.6rem;
+    }
 
-        header h1 {
-            color: var(--accent-gold);
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-            text-shadow: 0 0 10px rgba(255, 183, 3, 0.4);
-        }
+    .config-panel {
+      background: #edf2f7;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      font-size: 0.95rem;
+    }
 
-        header p {
-            color: #b7e4c7;
-            font-size: 0.95rem;
-        }
+    .checkbox-label {
+      cursor: pointer;
+      font-weight: bold;
+      color: #c0392b;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-        .main-container {
-            width: 100%;
-            max-width: 900px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+    .status-info {
+      font-size: 0.9rem;
+      color: #7f8c8d;
+      margin-bottom: 10px;
+    }
 
-        /* 頂部水果盤區域 */
-        .slot-machine-card {
-            background: var(--panel-bg);
-            border: 3px solid var(--accent-gold);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-        }
+    .display-box {
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      color: white;
+      font-size: 1.3rem;
+      font-weight: bold;
+      min-height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 12px;
+      margin: 15px 0;
+      padding: 15px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+      word-break: break-all;
+    }
 
-        .status-badge {
-            background: #2d6a4f;
-            color: #d8f3dc;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 1rem;
-            display: inline-block;
-            margin-bottom: 12px;
-            border: 1px solid var(--accent-gold);
-        }
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
 
-        .current-target {
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: #ffffff;
-            margin-bottom: 15px;
-            min-height: 2.2rem;
-        }
+    button {
+      background: var(--secondary-color);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.1s, background-color 0.2s;
+      flex: 1;
+    }
 
-        .slot-window {
-            background: #000;
-            border: 4px solid var(--accent-gold);
-            border-radius: 12px;
-            height: 120px;
-            overflow: hidden;
-            position: relative;
-            margin: 0 auto 15px auto;
-            max-width: 500px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-        }
+    button:hover {
+      background-color: #2980b9;
+    }
 
-        .slot-reel {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: top 0.1s ease-out;
-        }
+    button:active {
+      transform: scale(0.98);
+    }
 
-        .slot-item {
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: var(--accent-gold);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            width: 100%;
-            padding: 0 10px;
-            text-align: center;
-        }
+    button:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
+    button.btn-reset {
+      background-color: #e74c3c;
+    }
 
-        /* 拉霸大按鈕 */
-        .btn-spin {
-            padding: 12px 35px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            background: linear-gradient(180deg, #ffb703 0%, #fb8500 100%);
-            color: #000;
-            border: 2px solid #fff;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 183, 3, 0.4);
-            transition: all 0.2s;
-        }
+    button.btn-reset:hover {
+      background-color: #c0392b;
+    }
 
-        .btn-spin:hover:not(:disabled) {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(255, 183, 3, 0.7);
-        }
+    .history {
+      margin-top: 25px;
+      text-align: left;
+      border-top: 2px solid #eee;
+      padding-top: 15px;
+    }
 
-        .btn-spin:disabled {
-            background: #555;
-            color: #888;
-            border-color: #666;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+    .history h2 {
+      font-size: 1.05rem;
+      color: #7f8c8d;
+      margin-bottom: 10px;
+    }
 
-        .btn-reset {
-            padding: 12px 20px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            background: #333;
-            color: #ccc;
-            border: 1px solid #555;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+    .history ol {
+      padding-left: 20px;
+      margin: 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
 
-        .btn-reset:hover {
-            background: #d90429;
-            color: #fff;
-        }
+    .history li {
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      color: #34495e;
+      animation: fadeIn 0.4s ease;
+    }
 
-        /* 下方分館列表區域 */
-        .results-section {
-            background: var(--panel-bg);
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid var(--secondary-color);
-        }
-
-        .results-section h2 {
-            color: var(--accent-gold);
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--secondary-color);
-            padding-bottom: 8px;
-        }
-
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 15px;
-        }
-
-        .result-card {
-            background: var(--card-bg);
-            border-radius: 10px;
-            padding: 15px;
-            border: 2px solid var(--secondary-color);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .result-card:hover:not(.completed) {
-            transform: translateY(-3px);
-            border-color: var(--accent-gold);
-            box-shadow: 0 6px 15px rgba(255, 183, 3, 0.3);
-            background: #22577a;
-        }
-
-        .result-card.selected-active {
-            border-color: #ffb703 !important;
-            background: #2a6f97 !important;
-            box-shadow: 0 0 15px rgba(255, 183, 3, 0.6);
-        }
-
-        .result-card.completed {
-            border-color: #52b788;
-            opacity: 0.85;
-            cursor: default;
-            background: #143628;
-        }
-
-        .branch-name {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #fff;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .branch-tag {
-            font-size: 0.75rem;
-            padding: 3px 8px;
-            border-radius: 12px;
-            background: rgba(255,183,3,0.2);
-            color: var(--accent-gold);
-            border: 1px solid rgba(255,183,3,0.4);
-        }
-
-        .committee-list {
-            font-size: 0.95rem;
-            color: #d8f3dc;
-            min-height: 32px;
-        }
-
-        .committee-tag {
-            display: inline-block;
-            background: rgba(255, 183, 3, 0.15);
-            color: var(--accent-gold);
-            padding: 4px 8px;
-            border-radius: 4px;
-            margin: 2px;
-            font-size: 0.85rem;
-            border: 1px solid rgba(255, 183, 3, 0.3);
-        }
-
-        .click-hint {
-            font-size: 0.8rem;
-            color: #ffb703;
-            margin-top: 8px;
-            text-align: right;
-        }
-
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--accent-gold);
-            color: #000;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-
-        .toast.show {
-            opacity: 1;
-        }
-    </style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <h1>🎰 臺北市立圖書館 委員會抽籤系統</h1>
-        <p>1. 點擊下方「分館」進行選取  ➔  2. 按上方「開始拉霸抽籤」按鈕</p>
-    </header>
+  <div class="container">
+    <h1>委員會分館抽籤系統</h1>
 
-    <div class="main-container">
-        <!-- 頂部水果盤顯示區 -->
-        <div class="slot-machine-card">
-            <div id="statusBadge" class="status-badge">請選擇分館</div>
-            <div id="currentTarget" class="current-target">👈 請點選下方分館</div>
-
-            <div class="slot-window">
-                <div id="slotReel" class="slot-reel">
-                    <div class="slot-item">請先選擇分館</div>
-                </div>
-            </div>
-
-            <div class="controls">
-                <button id="spinBtn" class="btn-spin" onclick="startManualSpin()" disabled>🎰 開始拉霸抽籤</button>
-                <button class="btn-reset" onclick="resetAll()">🔄 重置所有紀錄</button>
-            </div>
-        </div>
-
-        <!-- 下方 11 個分館選單區 -->
-        <div class="results-section">
-            <h2>📋 各分館清單（點擊選擇分館）</h2>
-            <div id="resultsGrid" class="results-grid"></div>
-        </div>
+    <!-- 模式與狀態設定區 -->
+    <div class="config-panel">
+      <label class="checkbox-label">
+        <input type="checkbox" id="songshanToggle" onchange="toggleSongshanMode()">
+        開啟「松山分館」抽籤模式
+      </label>
     </div>
 
-    <div id="toast" class="toast">提示訊息</div>
+    <div id="branchStatus" class="status-info">目前狀態：普通分館（本館已抽 0 / 2 個）</div>
+    <div id="poolStatus" class="status-info">籤筒剩餘：15 籤</div>
+    
+    <div id="resultDisplay" class="display-box">
+      點擊「開始抽籤」按鈕
+    </div>
 
-    <script>
-        const ALL_BRANCHES = [
-            "舊莊分館", "中崙分館", "三興分館", "民生分館", 
-            "永春分館", "三民分館", "六合分館", "南港分館", 
-            "松山分館", "啓明分館", "廣慈分館"
-        ];
+    <div class="btn-group">
+      <button id="drawBtn" onclick="draw()">開始抽籤</button>
+      <button class="btn-reset" onclick="resetDraw()">重新開始 (重置全系統)</button>
+    </div>
 
-        const ALL_COMMITTEES = [
-            "館藏發展委員會",
-            "技術服務委員會",
-            "讀者服務委員會",
-            "推廣活動委員會",
-            "資訊暨視聽服務委員會",
-            "人力資源委員會",
-            "分館興建規劃暨修建工程委員會",
-            "為民服務暨業務考核委員會"
-        ];
+    <div class="history">
+      <h2>全案已抽出紀錄：</h2>
+      <ol id="historyList"></ol>
+    </div>
+  </div>
 
-        let drawResults = {};
-        let selectedBranch = null; // 當前被選中的分館
-        let isSpinning = false;
+  <script>
+    // 預設全域籤筒：館藏 1 票，其餘各 2 票
+    const basePool = [
+      "館藏發展委員會",
+      "技術服務委員會", "技術服務委員會",
+      "讀者服務委員會", "讀者服務委員會",
+      "推廣活動委員會", "推廣活動委員會",
+      "資訊暨視聽服務委員會", "資訊暨視聽服務委員會",
+      "人力資源委員會", "人力資源委員會",
+      "分館興建規劃暨修建工程委員會", "分館興建規劃暨修建工程委員會",
+      "為民服務暨業務考核委員會", "為民服務暨業務考核委員會"
+    ];
 
-        function init() {
-            drawResults = {};
-            ALL_BRANCHES.forEach(branch => {
-                drawResults[branch] = [];
-            });
-            selectedBranch = null;
-            isSpinning = false;
-            
-            updateTopDisplay();
-            renderResultsGrid();
-            showReelText("請先選擇分館");
+    let currentPool = [...basePool];
+    let branchDrawCount = 0; // 當前分館已抽次數 (最多 2 次)
+    let isRolling = false;
+
+    // 切換松山分館模式
+    function toggleSongshanMode() {
+      const isSongshan = document.getElementById("songshanToggle").checked;
+      branchDrawCount = 0; // 切換分館時重置該館抽籤計數
+      updateUI();
+    }
+
+    // 取得當前合格的籤筒選項（若為松山分館則過濾掉「館藏發展委員會」）
+    function getValidPool() {
+      const isSongshan = document.getElementById("songshanToggle").checked;
+      if (isSongshan) {
+        return currentPool.filter(item => item !== "館藏發展委員會");
+      }
+      return currentPool;
+    }
+
+    function updateUI() {
+      const isSongshan = document.getElementById("songshanToggle").checked;
+      const validPool = getValidPool();
+
+      // 更新分館狀態提示
+      const branchText = isSongshan ? "【松山分館】（排除館藏發展委員會）" : "【普通分館】";
+      document.getElementById("branchStatus").innerText = `目前分館：${branchText} | 本館已抽：${branchDrawCount} / 2 個`;
+
+      // 更新籤筒數量提示
+      document.getElementById("poolStatus").innerText = `全域籤筒剩餘：${currentPool.length} 籤 (當前可抽：${validPool.length} 籤)`;
+
+      // 按鈕狀態控制
+      const drawBtn = document.getElementById("drawBtn");
+      if (branchDrawCount >= 2) {
+        drawBtn.disabled = true;
+      } else if (validPool.length === 0) {
+        drawBtn.disabled = true;
+      } else {
+        drawBtn.disabled = false;
+      }
+    }
+
+    function draw() {
+      if (isRolling) return;
+
+      const validPool = getValidPool();
+      if (validPool.length === 0) {
+        alert("當前條件下沒有可抽取的籤了！");
+        return;
+      }
+
+      if (branchDrawCount >= 2) {
+        alert("本分館已抽滿 2 個委員會上限！請切換下一個分館。");
+        return;
+      }
+
+      isRolling = true;
+      const display = document.getElementById("resultDisplay");
+      const drawBtn = document.getElementById("drawBtn");
+      const isSongshan = document.getElementById("songshanToggle").checked;
+      drawBtn.disabled = true;
+
+      let counter = 0;
+      const totalTicks = 20;
+      const intervalTime = 50;
+
+      // 跑馬燈效果
+      const timer = setInterval(() => {
+        const randomIndex = Math.floor(Math.random() * validPool.length);
+        display.innerText = validPool[randomIndex];
+        counter++;
+
+        if (counter >= totalTicks) {
+          clearInterval(timer);
+          
+          // 隨機選出標的
+          const finalIndex = Math.floor(Math.random() * validPool.length);
+          const selected = validPool[finalIndex];
+
+          // 從真實總籤筒中移除一個該項目
+          const poolIndex = currentPool.indexOf(selected);
+          if (poolIndex !== -1) {
+            currentPool.splice(poolIndex, 1);
+          }
+
+          branchDrawCount++;
+
+          // 新增至歷史紀錄
+          const historyList = document.getElementById("historyList");
+          const li = document.createElement("li");
+          const tag = isSongshan ? "[松山分館]" : "[分館]";
+          li.innerText = `${tag} 抽出：${selected}`;
+          historyList.appendChild(li);
+
+          isRolling = false;
+
+          // 核心邏輯判斷：
+          // 1. 若抽到「館藏發展委員會」，該館立即結束（不再抽第 2 個）
+          // 2. 若該館已滿 2 個，該館結束
+          if (selected === "館藏發展委員會") {
+            display.innerText = `🎯 抽中【館藏發展委員會】！本館任務完成（免抽第 2 個）`;
+            branchDrawCount = 2; // 強制歸滿，禁止繼續抽
+          } else if (branchDrawCount >= 2) {
+            display.innerText = `🎉 抽出：${selected} (本館已滿 2 個)`;
+          } else {
+            display.innerText = `抽出：${selected} (請繼續抽第 2 個)`;
+          }
+
+          updateUI();
         }
+      }, intervalTime);
+    }
 
-        function isBranchCompleted(branch) {
-            const drawn = drawResults[branch] || [];
-            if (branch === "松山分館") {
-                return drawn.length >= 1;
-            }
-            if (drawn.includes("館藏發展委員會")) {
-                return true;
-            }
-            return drawn.length >= 2;
-        }
+    function resetDraw() {
+      if (isRolling) return;
+      currentPool = [...basePool];
+      branchDrawCount = 0;
+      document.getElementById("songshanToggle").checked = false;
+      document.getElementById("resultDisplay").innerText = "點擊「開始抽籤」按鈕";
+      document.getElementById("historyList").innerHTML = "";
+      updateUI();
+    }
 
-        function getAvailableOptions(branch) {
-            let options = [...ALL_COMMITTEES];
-            if (branch === "松山分館") {
-                options = options.filter(c => c !== "館藏發展委員會");
-            }
-            const existingDrawn = drawResults[branch] || [];
-            options = options.filter(c => !existingDrawn.includes(c));
-            return options;
-        }
-
-        function showReelText(text) {
-            const reel = document.getElementById("slotReel");
-            if (reel) {
-                reel.style.transition = "none";
-                reel.style.top = "0px";
-                reel.innerHTML = `<div class="slot-item">${text}</div>`;
-            }
-        }
-
-        function renderResultsGrid() {
-            const grid = document.getElementById("resultsGrid");
-            if (!grid) return;
-            grid.innerHTML = "";
-
-            ALL_BRANCHES.forEach((branch, index) => {
-                const card = document.createElement("div");
-                card.id = `card-${index}`;
-                card.className = "result-card";
-                card.onclick = () => selectBranch(branch, index);
-
-                let tagText = branch === "松山分館" ? "特規：僅抽1項" : "可抽 2 項";
-
-                card.innerHTML = `
-                    <div class="branch-name">
-                        <span>${branch}</span>
-                        <span class="branch-tag">${tagText}</span>
-                    </div>
-                    <div class="committee-list" id="list-${index}">
-                        <span style="color: #888;">尚未抽取</span>
-                    </div>
-                    <div class="click-hint" id="hint-${index}">👉 點擊選擇</div>
-                `;
-                grid.appendChild(card);
-            });
-            updateCardHighlights();
-        }
-
-        // 點擊下方卡片：僅進行「選取」
-        function selectBranch(branch, index) {
-            if (isSpinning) return;
-
-            if (isBranchCompleted(branch)) {
-                showToast(`【${branch}】已完成所有抽籤！`);
-                return;
-            }
-
-            selectedBranch = branch;
-            updateTopDisplay();
-            updateCardHighlights();
-            showReelText(`準備為【${branch}】抽籤`);
-        }
-
-        function updateTopDisplay() {
-            const badge = document.getElementById("statusBadge");
-            const target = document.getElementById("currentTarget");
-            const spinBtn = document.getElementById("spinBtn");
-
-            if (!selectedBranch) {
-                if (badge) {
-                    badge.innerText = "請選擇分館";
-                    badge.style.background = "#2d6a4f";
-                    badge.style.color = "#d8f3dc";
-                }
-                if (target) target.innerText = "👈 請先點選下方分館";
-                if (spinBtn) spinBtn.disabled = true;
-            } else {
-                const drawn = drawResults[selectedBranch] || [];
-                const currentDrawNum = drawn.length + 1;
-                
-                if (badge) {
-                    badge.innerText = "已選擇分館";
-                    badge.style.background = "#ffb703";
-                    badge.style.color = "#000";
-                }
-                if (target) target.innerText = `已選擇：【${selectedBranch}】 (準備抽第 ${currentDrawNum} 項)`;
-                if (spinBtn) spinBtn.disabled = false;
-            }
-        }
-
-        function updateCardHighlights() {
-            ALL_BRANCHES.forEach((branch, index) => {
-                const card = document.getElementById(`card-${index}`);
-                const listDiv = document.getElementById(`list-${index}`);
-                const hintDiv = document.getElementById(`hint-${index}`);
-                if (!card) return;
-
-                const drawn = drawResults[branch] || [];
-
-                if (drawn.length > 0) {
-                    listDiv.innerHTML = drawn.map(item => `<span class="committee-tag">${item}</span>`).join("");
-                } else {
-                    listDiv.innerHTML = `<span style="color: #888;">尚未抽取</span>`;
-                }
-
-                card.classList.remove("selected-active");
-
-                if (isBranchCompleted(branch)) {
-                    card.classList.add("completed");
-                    hintDiv.innerText = "✅ 已完成";
-                    hintDiv.style.color = "#52b788";
-                } else {
-                    card.classList.remove("completed");
-                    const remain = (branch === "松山分館") ? 1 : (2 - drawn.length);
-                    hintDiv.innerText = `👉 點擊選擇 (還差 ${remain} 項)`;
-                    hintDiv.style.color = "#ffb703";
-                }
-
-                if (branch === selectedBranch) {
-                    card.classList.add("selected-active");
-                    hintDiv.innerText = "🎯 目前選取中";
-                }
-            });
-        }
-
-        // 手動按下「開始拉霸抽籤」按鈕後觸發
-        function startManualSpin() {
-            if (isSpinning || !selectedBranch) return;
-
-            const options = getAvailableOptions(selectedBranch);
-            if (options.length === 0) return;
-
-            isSpinning = true;
-            const spinBtn = document.getElementById("spinBtn");
-            if (spinBtn) spinBtn.disabled = true;
-
-            const currentDrawNum = (drawResults[selectedBranch] || []).length + 1;
-            const badge = document.getElementById("statusBadge");
-            const target = document.getElementById("currentTarget");
-
-            if (badge) {
-                badge.innerText = "🎰 正在拉霸中...";
-                badge.style.background = "#ffb703";
-                badge.style.color = "#000";
-            }
-            if (target) {
-                target.innerText = `【${selectedBranch}】 正在抽取第 ${currentDrawNum} 個委員會...`;
-            }
-
-            const selected = options[Math.floor(Math.random() * options.length)];
-
-            // 啟動水果盤滾動動畫
-            const reel = document.getElementById("slotReel");
-            let reelHtml = "";
-            const totalAnimationItems = 25;
-
-            for (let i = 0; i < totalAnimationItems; i++) {
-                const randomOpt = ALL_COMMITTEES[Math.floor(Math.random() * ALL_COMMITTEES.length)];
-                reelHtml += `<div class="slot-item">${randomOpt}</div>`;
-            }
-            reelHtml += `<div class="slot-item" style="color: #ffb703; font-size: 1.7rem;">🎉 ${selected}</div>`;
-
-            if (reel) {
-                reel.style.transition = "none";
-                reel.style.top = "0px";
-                reel.innerHTML = reelHtml;
-                reel.offsetHeight;
-
-                const targetTop = -(totalAnimationItems * 120);
-                reel.style.transition = "top 2.2s cubic-bezier(0.15, 0.85, 0.35, 1.05)";
-                reel.style.top = `${targetTop}px`;
-            }
-
-            // 動畫結束後寫入紀錄
-            setTimeout(() => {
-                isSpinning = false;
-                const activeBranch = selectedBranch;
-                drawResults[activeBranch].push(selected);
-
-                // 判斷是否已完成該分館
-                if (isBranchCompleted(activeBranch)) {
-                    selectedBranch = null; // 完成後取消選取
-                }
-
-                updateTopDisplay();
-                updateCardHighlights();
-
-                if (badge) {
-                    badge.innerText = "抽籤完成";
-                    badge.style.background = "#52b788";
-                    badge.style.color = "#fff";
-                }
-                if (target) {
-                    target.innerText = `🎉 【${activeBranch}】 抽中了：${selected}`;
-                }
-
-                // 特規提示
-                if (selected === "館藏發展委員會" && activeBranch !== "松山分館") {
-                    showToast(`【${activeBranch}】抽中館藏發展委員會，觸發免抽第二項規則！🎉`);
-                } else if (activeBranch === "松山分館") {
-                    showToast(`【松山分館】已完成單項抽籤！👍`);
-                }
-
-            }, 2300);
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById("toast");
-            if (!toast) return;
-            toast.innerText = msg;
-            toast.classList.add("show");
-            setTimeout(() => {
-                toast.classList.remove("show");
-            }, 3500);
-        }
-
-        function resetAll() {
-            if (confirm("確定要重置所有分館的抽籤紀錄嗎？")) {
-                init();
-                showToast("已重置所有資料，請重新選擇分館進行抽籤");
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", init);
-    </script>
+    // 初始化 UI
+    updateUI();
+  </script>
 </body>
 </html>
