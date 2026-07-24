@@ -1,380 +1,658 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>圖書館委員會抽籤系統</title>
-  <style>
-    :root {
-      --primary-color: #2c3e50;
-      --secondary-color: #3498db;
-      --bg-color: #f8f9fa;
-      --card-bg: #ffffff;
-      --text-color: #333333;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>臺北市立圖書館 水果轉盤抽籤系統</title>
+    <style>
+        :root {
+            --bg-color: #0d1b2a;
+            --panel-bg: #1b263b;
+            --accent-gold: #ffb703;
+            --accent-red: #e63946;
+            --text-light: #f1faee;
+            --border-color: #415a77;
+        }
 
-    body {
-      font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-      box-sizing: border-box;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+        }
 
-    .container {
-      background: var(--card-bg);
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      width: 100%;
-      max-width: 580px;
-      padding: 30px;
-      text-align: center;
-    }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    h1 {
-      margin-top: 0;
-      color: var(--primary-color);
-      font-size: 1.6rem;
-    }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--accent-gold);
+            padding-bottom: 10px;
+            width: 100%;
+            max-width: 1000px;
+        }
 
-    .config-panel {
-      background: #edf2f7;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 0.95rem;
-    }
+        header h1 {
+            color: var(--accent-gold);
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px rgba(255, 183, 3, 0.4);
+        }
 
-    .checkbox-label {
-      cursor: pointer;
-      font-weight: bold;
-      color: #c0392b;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
+        .main-layout {
+            display: flex;
+            flex-direction: row;
+            gap: 25px;
+            width: 100%;
+            max-width: 1000px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-    .status-info {
-      font-size: 0.9rem;
-      color: #7f8c8d;
-      margin-bottom: 6px;
-    }
+        /* 轉盤區塊 */
+        .wheel-container {
+            flex: 1;
+            min-width: 340px;
+            max-width: 450px;
+            background: var(--panel-bg);
+            border: 3px solid var(--accent-gold);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-    .display-box {
-      background: linear-gradient(135deg, #2c3e50, #3498db);
-      color: white;
-      font-size: 1.3rem;
-      font-weight: bold;
-      min-height: 110px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 12px;
-      margin: 15px 0;
-      padding: 15px;
-      box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
-      word-break: break-all;
-    }
+        .status-badge {
+            background: #2a9d8f;
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
 
-    .btn-group {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
+        .current-target {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 15px;
+            min-height: 2rem;
+            text-align: center;
+        }
 
-    button {
-      background: var(--secondary-color);
-      color: white;
-      border: none;
-      padding: 12px 18px;
-      font-size: 0.95rem;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.1s, background-color 0.2s;
-      flex: 1;
-    }
+        /* 水果轉盤本體 */
+        .wheel-wrapper {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin-bottom: 20px;
+        }
 
-    button:hover {
-      background-color: #2980b9;
-    }
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid var(--accent-red);
+            z-index: 10;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+        }
 
-    button:active {
-      transform: scale(0.98);
-    }
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+        }
 
-    button:disabled {
-      background-color: #bdc3c7;
-      cursor: not-allowed;
-    }
+        .btn-spin {
+            width: 80%;
+            padding: 12px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: linear-gradient(180deg, #ffb703 0%, #fb8500 100%);
+            color: #000;
+            border: 2px solid #fff;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 183, 3, 0.4);
+            transition: all 0.2s;
+        }
 
-    button.btn-next-branch {
-      background-color: #27ae60;
-    }
+        .btn-spin:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 183, 3, 0.7);
+        }
 
-    button.btn-next-branch:hover {
-      background-color: #219653;
-    }
+        .btn-spin:disabled {
+            background: #555;
+            color: #888;
+            border-color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
 
-    button.btn-reset {
-      background-color: #e74c3c;
-    }
+        .btn-reset {
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            background: transparent;
+            color: #aaa;
+            border: 1px solid #555;
+            border-radius: 20px;
+            cursor: pointer;
+        }
 
-    button.btn-reset:hover {
-      background-color: #c0392b;
-    }
+        .btn-reset:hover {
+            color: #fff;
+            border-color: #fff;
+        }
 
-    .history {
-      margin-top: 25px;
-      text-align: left;
-      border-top: 2px solid #eee;
-      padding-top: 15px;
-    }
+        /* 右側分館列表 */
+        .results-section {
+            flex: 1.2;
+            min-width: 320px;
+            background: var(--panel-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
 
-    .history h2 {
-      font-size: 1.05rem;
-      color: #7f8c8d;
-      margin-bottom: 10px;
-    }
+        .results-section h2 {
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
 
-    .history ol {
-      padding-left: 20px;
-      margin: 0;
-      max-height: 180px;
-      overflow-y: auto;
-    }
+        .results-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
 
-    .history li {
-      margin-bottom: 6px;
-      font-size: 0.95rem;
-      color: #34495e;
-      animation: fadeIn 0.4s ease;
-    }
+        .result-card {
+            background: #0d1b2a;
+            border-radius: 8px;
+            padding: 10px 14px;
+            border: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+        .result-card:hover:not(.completed) {
+            border-color: var(--accent-gold);
+            background: #1e3a5f;
+        }
+
+        .result-card.selected-active {
+            border-color: var(--accent-gold) !important;
+            background: #2a4d7c !important;
+            box-shadow: 0 0 10px rgba(255, 183, 3, 0.5);
+        }
+
+        .result-card.completed {
+            border-color: #2a9d8f;
+            opacity: 0.75;
+            background: #0d2818;
+            cursor: default;
+        }
+
+        .branch-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .branch-name {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .branch-tag {
+            font-size: 0.75rem;
+            color: #a8dadc;
+        }
+
+        .committee-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .tag {
+            background: rgba(255, 183, 3, 0.2);
+            color: var(--accent-gold);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255, 183, 3, 0.4);
+        }
+
+        .tag.free {
+            background: rgba(42, 157, 143, 0.3);
+            color: #2a9d8f;
+            border-color: #2a9d8f;
+        }
+
+        /* Toast 提示浮窗 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-gold);
+            color: #000;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>圖書館委員會抽籤系統</h1>
+    <header>
+        <h1>🎡 臺北市立圖書館 水果轉盤抽籤系統</h1>
+        <p>請先點選右側「分館」，再按轉盤「開始旋轉抽籤」</p>
+    </header>
 
-    <!-- 模式選擇 -->
-    <div class="config-panel">
-      <label class="checkbox-label">
-        <input type="checkbox" id="songshanToggle" onchange="switchBranchMode()">
-        開啟「松山分館」模式（只抽 1 次，排除館藏發展）
-      </label>
+    <div class="main-layout">
+        <!-- 左側水果轉盤區 -->
+        <div class="wheel-container">
+            <div id="statusBadge" class="status-badge">請先點選分館</div>
+            <div id="currentTarget" class="current-target">👉 請點選右側分館開始</div>
+
+            <div class="wheel-wrapper">
+                <div class="pointer"></div>
+                <canvas id="wheelCanvas" width="320" height="320"></canvas>
+            </div>
+
+            <button id="spinBtn" class="btn-spin" onclick="spinWheel()" disabled>🎰 開始旋轉抽籤</button>
+            <button class="btn-reset" onclick="resetAll()">🔄 重置所有抽籤紀錄</button>
+        </div>
+
+        <!-- 右側 11 分館狀態區 -->
+        <div class="results-section">
+            <h2>📋 分館清單與抽籤結果</h2>
+            <div id="resultsGrid" class="results-grid"></div>
+        </div>
     </div>
 
-    <div id="branchStatus" class="status-info">目前狀態：普通分館（準備第 1 次抽籤 / 共 2 次）</div>
-    <div id="poolStatus" class="status-info">剩餘正式委員會：計算中...</div>
-    
-    <div id="resultDisplay" class="display-box">
-      點擊「開始抽籤」按鈕
-    </div>
+    <div id="toast" class="toast">提示內容</div>
 
-    <div class="btn-group">
-      <button id="drawBtn" onclick="draw()">開始抽籤</button>
-      <button class="btn-next-branch" onclick="nextBranch()">換下一分館</button>
-      <button class="btn-reset" onclick="resetDraw()">重置全系統</button>
-    </div>
+    <script>
+        const ALL_BRANCHES = [
+            "舊莊分館", "中崙分館", "三興分館", "民生分館", 
+            "永春分館", "三民分館", "六合分館", "南港分館", 
+            "松山分館", "啓明分館", "廣慈分館"
+        ];
 
-    <div class="history">
-      <h2>抽出紀錄歷史：</h2>
-      <ol id="historyList"></ol>
-    </div>
-  </div>
+        const ALL_COMMITTEES = [
+            "館藏發展委員會",
+            "技術服務委員會",
+            "讀者服務委員會",
+            "推廣活動委員會",
+            "資訊暨視聽服務委員會",
+            "人力資源委員會",
+            "分館興建規劃暨修建工程委員會",
+            "為民服務暨業務考核委員會",
+            "獲得免參加一次"
+        ];
 
-  <script>
-    // 預設可抽取的 8 個正式委員會名單（抽完即移除）
-    const initialFormalCommittees = [
-      "館藏發展委員會",
-      "技術服務委員會",
-      "讀者服務委員會",
-      "推廣活動委員會",
-      "資訊暨視聽服務委員會",
-      "人力資源委員會",
-      "分館興建規劃暨修建工程委員會",
-      "為民服務暨業務考核委員會"
-    ];
+        // 轉盤扇形顏色組合（水果鮮豔風格）
+        const SLICE_COLORS = [
+            "#f94144", "#f3722c", "#f8961e", "#f9c74f", 
+            "#90be6d", "#43aa8b", "#577590", "#277da1", "#9d4edd"
+        ];
 
-    const freePassOption = "恭喜不用參加第二個委員會"; // 僅限第二支籤使用的底牌項目
+        let drawResults = {};
+        let selectedBranch = null;
+        let isSpinning = false;
+        let currentRotation = 0; // 轉盤當前角度 (弧度)
 
-    let remainingFormalCommittees = [...initialFormalCommittees];
-    let branchDrawCount = 0; // 當前分館已抽次數
-    let isRolling = false;
+        function init() {
+            drawResults = {};
+            ALL_BRANCHES.forEach(b => drawResults[b] = []);
+            selectedBranch = null;
+            isSpinning = false;
 
-    // 切換分館模式（松山 vs 普通）
-    function switchBranchMode() {
-      if (isRolling) return;
-      branchDrawCount = 0;
-      document.getElementById("resultDisplay").innerText = "已準備好，請點擊「開始抽籤」";
-      updateUI();
-    }
-
-    // 換下一個分館
-    function nextBranch() {
-      if (isRolling) return;
-      branchDrawCount = 0;
-      document.getElementById("resultDisplay").innerText = "已準備好，請點擊「開始抽籤」";
-      updateUI();
-    }
-
-    // 依據規則取得當前可供抽選的籤筒項目集合
-    function getCandidatePool() {
-      const isSongshan = document.getElementById("songshanToggle").checked;
-
-      // 先複製一份剩餘的正式委員會
-      let pool = [...remainingFormalCommittees];
-
-      // 松山分館（雖然只抽第 1 次）過濾掉「館藏發展委員會」
-      if (isSongshan) {
-        pool = pool.filter(item => item !== "館藏發展委員會");
-      }
-
-      // 判斷是【第 1 支籤】還是【第 2 支籤】
-      if (branchDrawCount === 0) {
-        // === 第 1 支籤 ===
-        // 不加「恭喜不用...」，只從剩餘的正式委員會中抽
-      } else if (branchDrawCount === 1) {
-        // === 第 2 支籤 ===
-        // 1. 自動過濾「館藏發展委員會」
-        pool = pool.filter(item => item !== "館藏發展委員會");
-        // 2. 加入「恭喜不用參加第二個委員會」至籤筒
-        pool.push(freePassOption);
-      }
-
-      return pool;
-    }
-
-    function updateUI() {
-      const isSongshan = document.getElementById("songshanToggle").checked;
-      const drawBtn = document.getElementById("drawBtn");
-
-      // 分館狀態提示
-      if (isSongshan) {
-        document.getElementById("branchStatus").innerText = `目前分館：【松山分館】（只抽 1 次 | 已抽 ${branchDrawCount}/1 次）`;
-      } else {
-        const nextDrawNum = branchDrawCount + 1;
-        document.getElementById("branchStatus").innerText = `目前分館：【普通分館】（已抽 ${branchDrawCount}/2 次 ${branchDrawCount < 2 ? '→ 準備抽第 ' + nextDrawNum + ' 支籤' : ''}）`;
-      }
-
-      // 剩餘正式委員會提示
-      const hasCollection = remainingFormalCommittees.includes("館藏發展委員會");
-      const collectionText = hasCollection ? "🟢 館藏發展尚在" : "❌ 館藏發展已抽出";
-      document.getElementById("poolStatus").innerText = `剩餘正式委員會：${remainingFormalCommittees.length} 個 (${collectionText})`;
-
-      // 抽籤按鈕啟用/停用
-      const maxAllowed = isSongshan ? 1 : 2;
-      const candidatePool = getCandidatePool();
-      
-      // 次數滿了 或 籤筒無資料 時禁用按鈕
-      drawBtn.disabled = (branchDrawCount >= maxAllowed) || (candidatePool.length === 0);
-    }
-
-    function draw() {
-      if (isRolling) return;
-
-      const isSongshan = document.getElementById("songshanToggle").checked;
-      const maxAllowed = isSongshan ? 1 : 2;
-
-      if (branchDrawCount >= maxAllowed) {
-        alert("本分館抽籤次數已達上限！請點擊「換下一分館」。");
-        return;
-      }
-
-      const candidatePool = getCandidatePool();
-      if (candidatePool.length === 0) {
-        alert("目前無可抽取的委員會籤！");
-        return;
-      }
-
-      isRolling = true;
-
-      const display = document.getElementById("resultDisplay");
-      const drawBtn = document.getElementById("drawBtn");
-      drawBtn.disabled = true;
-
-      let counter = 0;
-      const totalTicks = 20;  // 跑馬燈切換次數
-      const intervalTime = 50; // 每一次切換毫秒數
-
-      // 亂數跑馬燈動畫
-      const timer = setInterval(() => {
-        const randomIndex = Math.floor(Math.random() * candidatePool.length);
-        display.innerText = candidatePool[randomIndex];
-        counter++;
-
-        if (counter >= totalTicks) {
-          clearInterval(timer);
-          
-          // 隨機取出最終結果
-          const finalIndex = Math.floor(Math.random() * candidatePool.length);
-          const selected = candidatePool[finalIndex];
-
-          branchDrawCount++;
-
-          // 若抽中正式委員會，則從全域名額中扣除；若為「恭喜不用...」則不影響正式委員會名單
-          if (selected !== freePassOption) {
-            const indexInFormal = remainingFormalCommittees.indexOf(selected);
-            if (indexInFormal !== -1) {
-              remainingFormalCommittees.splice(indexInFormal, 1);
-            }
-          }
-
-          // 新增歷史紀錄
-          const historyList = document.getElementById("historyList");
-          const li = document.createElement("li");
-          const branchName = isSongshan ? "[松山分館]" : "[普通分館]";
-          li.innerText = `${branchName} 第 ${branchDrawCount} 支籤：${selected}`;
-          historyList.appendChild(li);
-
-          isRolling = false;
-
-          // 結果呈現邏輯：
-          // 1. 普通分館第 1 支籤抽中「館藏發展委員會」 -> 不用抽第 2 支籤
-          if (!isSongshan && selected === "館藏發展委員會") {
-            display.innerText = `🎯 抽中【館藏發展委員會】！不用抽第二支籤`;
-            branchDrawCount = 2; // 強制設定已滿 2 次，結束該館抽籤
-          } 
-          // 2. 本分館次數額滿
-          else if (branchDrawCount >= maxAllowed) {
-            display.innerText = `🎉 抽中：${selected} (本館抽籤完成)`;
-          } 
-          // 3. 還可以抽第 2 支籤
-          else {
-            display.innerText = `抽中：${selected} (請繼續抽第 2 支籤)`;
-          }
-
-          updateUI();
+            renderResultsGrid();
+            updateTopDisplay();
+            drawWheel([]); // 預設顯示空白轉盤
         }
-      }, intervalTime);
-    }
 
-    function resetDraw() {
-      if (isRolling) return;
-      remainingFormalCommittees = [...initialFormalCommittees];
-      branchDrawCount = 0;
-      document.getElementById("songshanToggle").checked = false;
-      document.getElementById("resultDisplay").innerText = "點擊「開始抽籤」按鈕";
-      document.getElementById("historyList").innerHTML = "";
-      updateUI();
-    }
+        // 判斷該館是否已完成
+        function isBranchCompleted(branch) {
+            const drawn = drawResults[branch] || [];
+            if (branch === "松山分館") return drawn.length >= 1;
+            if (drawn.includes("館藏發展委員會")) return true;
+            return drawn.length >= 2;
+        }
 
-    // 初始化 UI
-    updateUI();
-  </script>
+        // 統計全系統被抽中次數
+        function getCommitteeCounts() {
+            const counts = {};
+            ALL_COMMITTEES.forEach(c => counts[c] = 0);
+            Object.values(drawResults).forEach(list => {
+                list.forEach(c => { if (counts[c] !== undefined) counts[c]++; });
+            });
+            return counts;
+        }
+
+        // 根據規則算出當前分館可抽取的選項
+        function getAvailableOptions(branch) {
+            if (!branch) return [];
+            const drawnByThisBranch = drawResults[branch] || [];
+            const globalCounts = getCommitteeCounts();
+            const isFirstDraw = (drawnByThisBranch.length === 0);
+
+            return ALL_COMMITTEES.filter(c => {
+                // 1. 同館不重複抽中相同項目
+                if (drawnByThisBranch.includes(c)) return false;
+
+                // 2. 「獲得免參加一次」：絕不出現在第 1 支籤
+                if (c === "獲得免參加一次" && isFirstDraw) return false;
+
+                // 3. 「館藏發展委員會」特規：
+                if (c === "館藏發展委員會") {
+                    if (branch === "松山分館") return false; // 松山分館排除
+                    if (!isFirstDraw) return false;          // 僅限第 1 支籤可抽
+                    if (globalCounts[c] >= 1) return false;  // 全系統僅限 1 次
+                } else if (c !== "獲得免參加一次") {
+                    // 其他委員會全系統上限 2 次
+                    if (globalCounts[c] >= 2) return false;
+                }
+
+                return true;
+            });
+        }
+
+        // 繪製水果轉盤
+        function drawWheel(options) {
+            const canvas = document.getElementById("wheelCanvas");
+            const ctx = canvas.getContext("2d");
+            const width = canvas.width;
+            const height = canvas.height;
+            const radius = width / 2;
+
+            ctx.clearRect(0, 0, width, height);
+
+            if (!options || options.length === 0) {
+                // 空白轉盤狀態
+                ctx.beginPath();
+                ctx.arc(radius, radius, radius - 5, 0, Math.PI * 2);
+                ctx.fillStyle = "#2b2d42";
+                ctx.fill();
+                ctx.strokeStyle = "#ffb703";
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                ctx.fillStyle = "#8d99ae";
+                ctx.font = "bold 16px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("請選擇右側分館", radius, radius);
+                return;
+            }
+
+            const numSlices = options.length;
+            const sliceAngle = (Math.PI * 2) / numSlices;
+
+            ctx.save();
+            ctx.translate(radius, radius);
+            ctx.rotate(currentRotation);
+
+            for (let i = 0; i < numSlices; i++) {
+                const angle = i * sliceAngle;
+                
+                // 畫扇形
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, radius - 5, angle, angle + sliceAngle);
+                ctx.fillStyle = SLICE_COLORS[i % SLICE_COLORS.length];
+                ctx.fill();
+                ctx.strokeStyle = "#0d1b2a";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // 畫文字
+                ctx.save();
+                ctx.rotate(angle + sliceAngle / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 13px sans-serif";
+                ctx.shadowColor = "rgba(0,0,0,0.8)";
+                ctx.shadowBlur = 4;
+                
+                // 簡化過長名稱以利顯示
+                let text = options[i];
+                if (text.length > 8) text = text.substring(0, 7) + "…";
+                
+                ctx.fillText(text, radius - 18, 5);
+                ctx.restore();
+            }
+
+            // 中心圓鈕
+            ctx.beginPath();
+            ctx.arc(0, 0, 25, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffb703";
+            ctx.fill();
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function renderResultsGrid() {
+            const grid = document.getElementById("resultsGrid");
+            grid.innerHTML = "";
+
+            ALL_BRANCHES.forEach((branch, idx) => {
+                const card = document.createElement("div");
+                card.id = `card-${idx}`;
+                card.className = "result-card";
+                card.onclick = () => selectBranch(branch, idx);
+
+                const drawn = drawResults[branch] || [];
+                const isComp = isBranchCompleted(branch);
+
+                let tagInfo = branch === "松山分館" ? "特規:僅抽1次" : "可抽 2 次";
+
+                card.innerHTML = `
+                    <div class="branch-info">
+                        <span class="branch-name">${branch}</span>
+                        <span class="branch-tag">${tagInfo}</span>
+                    </div>
+                    <div class="committee-tags" id="tags-${idx}">
+                        ${drawn.length > 0 ? drawn.map(c => `<span class="tag ${c==='獲得免參加一次'?'free':''}">${c}</span>`).join('') : '<span style="color:#666;font-size:0.8rem;">尚未抽取</span>'}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            updateCardHighlights();
+        }
+
+        function selectBranch(branch, idx) {
+            if (isSpinning) return;
+
+            if (isBranchCompleted(branch)) {
+                showToast(`【${branch}】已完成所有抽籤！`);
+                return;
+            }
+
+            selectedBranch = branch;
+            updateTopDisplay();
+            updateCardHighlights();
+
+            const options = getAvailableOptions(selectedBranch);
+            drawWheel(options);
+        }
+
+        function updateTopDisplay() {
+            const badge = document.getElementById("statusBadge");
+            const target = document.getElementById("currentTarget");
+            const spinBtn = document.getElementById("spinBtn");
+
+            if (!selectedBranch) {
+                badge.innerText = "請先點選分館";
+                badge.style.background = "#2a9d8f";
+                target.innerText = "👉 請點選右側分館開始";
+                spinBtn.disabled = true;
+            } else {
+                const drawn = drawResults[selectedBranch] || [];
+                const drawNum = drawn.length + 1;
+                badge.innerText = "準備抽籤中";
+                badge.style.background = "#ffb703";
+                badge.style.color = "#000";
+                target.innerText = `已選擇：【${selectedBranch}】 (第 ${drawNum} 籤)`;
+                spinBtn.disabled = false;
+            }
+        }
+
+        function updateCardHighlights() {
+            ALL_BRANCHES.forEach((b, idx) => {
+                const card = document.getElementById(`card-${idx}`);
+                if (!card) return;
+
+                card.classList.remove("selected-active", "completed");
+
+                if (isBranchCompleted(b)) {
+                    card.classList.add("completed");
+                } else if (b === selectedBranch) {
+                    card.classList.add("selected-active");
+                }
+            });
+        }
+
+        // 旋轉轉盤核心邏輯
+        function spinWheel() {
+            if (isSpinning || !selectedBranch) return;
+
+            const options = getAvailableOptions(selectedBranch);
+            if (options.length === 0) {
+                showToast(`【${selectedBranch}】目前無可抽取選項！`);
+                return;
+            }
+
+            isSpinning = true;
+            document.getElementById("spinBtn").disabled = true;
+
+            // 隨機選定中獎索引
+            const selectedIndex = Math.floor(Math.random() * options.length);
+            const selectedResult = options[selectedIndex];
+
+            // 計算旋轉角度
+            const numSlices = options.length;
+            const sliceAngle = (Math.PI * 2) / numSlices;
+            
+            // 指針固定在正上方 (3*PI/2)
+            // 目標扇形中心角度為：selectedIndex * sliceAngle + sliceAngle / 2
+            const targetSliceAngle = selectedIndex * sliceAngle + sliceAngle / 2;
+            
+            // 算需要的轉盤旋轉角度：(3*PI/2) - targetSliceAngle
+            const targetAngle = (Math.PI * 1.5) - targetSliceAngle;
+            
+            // 加上 5 ~ 8 圈的多餘轉速 (大轉盤效果)
+            const extraRounds = (5 + Math.floor(Math.random() * 3)) * (Math.PI * 2);
+            
+            const startAngle = currentRotation;
+            const finalAngle = startAngle + extraRounds + ((targetAngle - (startAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2));
+
+            const duration = 4000; // 旋轉 4 秒
+            const startTime = performance.now();
+
+            function animateWheel(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Ease-out 減速效果
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                currentRotation = startAngle + (finalAngle - startAngle) * easeOut;
+
+                drawWheel(options);
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateWheel);
+                } else {
+                    // 旋轉完成處理
+                    isSpinning = false;
+                    const activeBranch = selectedBranch;
+                    drawResults[activeBranch].push(selectedResult);
+
+                    if (isBranchCompleted(activeBranch)) {
+                        selectedBranch = null;
+                    }
+
+                    renderResultsGrid();
+                    updateTopDisplay();
+
+                    if (!selectedBranch) {
+                        drawWheel([]);
+                    } else {
+                        drawWheel(getAvailableOptions(selectedBranch));
+                    }
+
+                    // 觸發特殊提示
+                    if (selectedResult === "館藏發展委員會" && activeBranch !== "松山分館") {
+                        showToast(`🎉 【${activeBranch}】抽中館藏發展委員會，額滿免抽第2籤！`);
+                    } else if (selectedResult === "獲得免參加一次") {
+                        showToast(`🎁 恭喜【${activeBranch}】抽中「獲得免參加一次」！`);
+                    } else {
+                        showToast(`🎉 【${activeBranch}】抽中了：${selectedResult}`);
+                    }
+                }
+            }
+
+            requestAnimationFrame(animateWheel);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById("toast");
+            toast.innerText = msg;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 3500);
+        }
+
+        function resetAll() {
+            if (confirm("確定要重置所有紀錄嗎？")) {
+                init();
+                showToast("已重置所有資料！");
+            }
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
